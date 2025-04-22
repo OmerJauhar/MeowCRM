@@ -14,7 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { format } from "date-fns"
 import { CalendarIcon, Sparkles, X, Plus, Search } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { toast } from "@/hooks/use-toast"
+import { toast } from "@/components/ui/use-toast"
 
 // Sample companies for selection
 const companies = [
@@ -23,6 +23,16 @@ const companies = [
   { id: "3", name: "Stark Industries" },
   { id: "4", name: "Umbrella Corp" },
   { id: "5", name: "Wayne Enterprises" },
+]
+
+// Sample customers for selection
+const customers = [
+  { id: "c1", firstName: "John", lastName: "Smith", companyId: "1" },
+  { id: "c2", firstName: "Sarah", lastName: "Johnson", companyId: "1" },
+  { id: "c3", firstName: "Michael", lastName: "Brown", companyId: "1" },
+  { id: "c4", firstName: "Robert", lastName: "Wilson", companyId: "2" },
+  { id: "c5", firstName: "Anthony", lastName: "Stark", companyId: "3" },
+  { id: "c6", firstName: "Virginia", lastName: "Potts", companyId: "3" },
 ]
 
 // Sample users for participants selection
@@ -66,16 +76,31 @@ const users = [
 ]
 
 export function ActivityForm() {
-  const [activityType, setActivityType] = useState("meeting")
+  // Initialize state for all required fields according to Activity schema
+  const [type, setType] = useState("meeting")
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [company, setCompany] = useState("")
-  const [date, setDate] = useState<Date | undefined>(new Date())
+  const [customerId, setCustomerId] = useState("")
+  const [userId, setUserId] = useState("u1") // Default to first user
+  const [activityDate, setActivityDate] = useState<Date | undefined>(new Date())
   const [time, setTime] = useState("09:00")
-  const [duration, setDuration] = useState("30")
   const [outcome, setOutcome] = useState("")
   const [participants, setParticipants] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState("")
+  const [companyId, setCompanyId] = useState("")
+  const [filteredCustomers, setFilteredCustomers] = useState(customers)
+
+  // Filter customers based on selected company
+  const handleCompanyChange = (value: string) => {
+    setCompanyId(value)
+    if (value) {
+      setFilteredCustomers(customers.filter((customer) => customer.companyId === value))
+    } else {
+      setFilteredCustomers(customers)
+    }
+    // Reset customer selection when company changes
+    setCustomerId("")
+  }
 
   const handleAddParticipant = (userId: string) => {
     if (!participants.includes(userId)) {
@@ -97,23 +122,24 @@ export function ActivityForm() {
 
   const handleGenerateWithAI = () => {
     // In a real app, this would call an AI service
-    if (activityType === "meeting") {
+    if (type === "meeting") {
       setDescription(
         "Discuss product roadmap and implementation timeline. Review technical requirements and address any concerns.",
       )
-    } else if (activityType === "call") {
+    } else if (type === "call") {
       setDescription("Follow up on previous discussions and address any questions about our proposal.")
-    } else if (activityType === "email") {
+    } else if (type === "email") {
       setDescription(
         "Send detailed information about our services, including pricing options and implementation timeline.",
       )
-    } else if (activityType === "task") {
+    } else if (type === "task") {
       setDescription("Prepare custom documentation and implementation guides for the client's technical team.")
     }
   }
 
   const handleSubmit = () => {
-    if (!title || !company) {
+    // Validate required fields according to Activity schema
+    if (!customerId || !userId || !type || !description || !activityDate) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields.",
@@ -122,25 +148,28 @@ export function ActivityForm() {
       return
     }
 
-    // Create new activity object
+    // Create new activity object based on the schema
     const newActivity = {
       id: Math.random().toString(36).substring(2, 9),
-      type: activityType,
-      title,
-      date: date ? format(date, "yyyy-MM-dd") : new Date().toISOString().split("T")[0],
-      time,
-      duration: activityType === "meeting" || activityType === "call" ? `${duration} min` : undefined,
+      customerId,
+      userId,
+      type,
       description,
+      date: activityDate ? format(activityDate, "yyyy-MM-dd") : new Date().toISOString().split("T")[0],
+      time,
+      title,
       outcome,
-      company: companies.find((c) => c.id === company)?.name || "",
-      companyId: company,
+      aiSummary: "AI-generated summary would appear here in a real application.",
+      // For display purposes
+      customer: customers.find((c) => c.id === customerId),
+      user: users.find((u) => u.id === userId),
       participants: selectedParticipantsData,
     }
 
     // In a real app, you would save this to your database
     toast({
       title: "Activity Created",
-      description: `${activityType.charAt(0).toUpperCase() + activityType.slice(1)} "${title}" has been created.`,
+      description: `${type.charAt(0).toUpperCase() + type.slice(1)} "${title}" has been created.`,
     })
 
     // Reset form
@@ -150,13 +179,14 @@ export function ActivityForm() {
   const resetForm = () => {
     setTitle("")
     setDescription("")
-    setCompany("")
-    setDate(new Date())
+    setCompanyId("")
+    setCustomerId("")
+    setActivityDate(new Date())
     setTime("09:00")
-    setDuration("30")
     setOutcome("")
     setParticipants([])
     setSearchQuery("")
+    setFilteredCustomers(customers)
   }
 
   return (
@@ -168,9 +198,9 @@ export function ActivityForm() {
       <CardContent className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="activity-type" className="text-[#f8fafc]">
-            Activity Type
+            Activity Type <span className="text-red-500">*</span>
           </Label>
-          <Select value={activityType} onValueChange={setActivityType}>
+          <Select value={type} onValueChange={setType}>
             <SelectTrigger className="bg-[#0f172a] border-[#334155] text-[#f8fafc]">
               <SelectValue placeholder="Select activity type" />
             </SelectTrigger>
@@ -193,7 +223,7 @@ export function ActivityForm() {
 
         <div className="space-y-2">
           <Label htmlFor="title" className="text-[#f8fafc]">
-            Title <span className="text-red-500">*</span>
+            Title
           </Label>
           <Input
             id="title"
@@ -206,9 +236,9 @@ export function ActivityForm() {
 
         <div className="space-y-2">
           <Label htmlFor="company" className="text-[#f8fafc]">
-            Company <span className="text-red-500">*</span>
+            Company
           </Label>
-          <Select value={company} onValueChange={setCompany}>
+          <Select value={companyId} onValueChange={handleCompanyChange}>
             <SelectTrigger className="bg-[#0f172a] border-[#334155] text-[#f8fafc]">
               <SelectValue placeholder="Select company" />
             </SelectTrigger>
@@ -226,10 +256,54 @@ export function ActivityForm() {
           </Select>
         </div>
 
+        <div className="space-y-2">
+          <Label htmlFor="customer" className="text-[#f8fafc]">
+            Customer <span className="text-red-500">*</span>
+          </Label>
+          <Select value={customerId} onValueChange={setCustomerId}>
+            <SelectTrigger className="bg-[#0f172a] border-[#334155] text-[#f8fafc]">
+              <SelectValue placeholder="Select customer" />
+            </SelectTrigger>
+            <SelectContent className="bg-[#1e293b] border-[#334155]">
+              {filteredCustomers.map((customer) => (
+                <SelectItem
+                  key={customer.id}
+                  value={customer.id}
+                  className="text-[#f8fafc] focus:bg-[#334155] focus:text-[#f8fafc]"
+                >
+                  {customer.firstName} {customer.lastName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="userId" className="text-[#f8fafc]">
+            Assigned User <span className="text-red-500">*</span>
+          </Label>
+          <Select value={userId} onValueChange={setUserId}>
+            <SelectTrigger className="bg-[#0f172a] border-[#334155] text-[#f8fafc]">
+              <SelectValue placeholder="Select user" />
+            </SelectTrigger>
+            <SelectContent className="bg-[#1e293b] border-[#334155]">
+              {users.map((user) => (
+                <SelectItem
+                  key={user.id}
+                  value={user.id}
+                  className="text-[#f8fafc] focus:bg-[#334155] focus:text-[#f8fafc]"
+                >
+                  {user.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="date" className="text-[#f8fafc]">
-              Date
+              Date <span className="text-red-500">*</span>
             </Label>
             <Popover>
               <PopoverTrigger asChild>
@@ -237,18 +311,18 @@ export function ActivityForm() {
                   variant="outline"
                   className={cn(
                     "w-full justify-start text-left font-normal border-[#334155] bg-[#0f172a] text-[#f8fafc]",
-                    !date && "text-muted-foreground",
+                    !activityDate && "text-muted-foreground",
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, "PPP") : <span>Pick a date</span>}
+                  {activityDate ? format(activityDate, "PPP") : <span>Pick a date</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0 bg-[#1e293b] border-[#334155]">
                 <Calendar
                   mode="single"
-                  selected={date}
-                  onSelect={setDate}
+                  selected={activityDate}
+                  onSelect={setActivityDate}
                   initialFocus
                   className="bg-[#1e293b] text-[#f8fafc]"
                 />
@@ -270,43 +344,10 @@ export function ActivityForm() {
           </div>
         </div>
 
-        {(activityType === "meeting" || activityType === "call") && (
-          <div className="space-y-2">
-            <Label htmlFor="duration" className="text-[#f8fafc]">
-              Duration (minutes)
-            </Label>
-            <Select value={duration} onValueChange={setDuration}>
-              <SelectTrigger className="bg-[#0f172a] border-[#334155] text-[#f8fafc]">
-                <SelectValue placeholder="Select duration" />
-              </SelectTrigger>
-              <SelectContent className="bg-[#1e293b] border-[#334155]">
-                <SelectItem value="15" className="text-[#f8fafc] focus:bg-[#334155] focus:text-[#f8fafc]">
-                  15 minutes
-                </SelectItem>
-                <SelectItem value="30" className="text-[#f8fafc] focus:bg-[#334155] focus:text-[#f8fafc]">
-                  30 minutes
-                </SelectItem>
-                <SelectItem value="45" className="text-[#f8fafc] focus:bg-[#334155] focus:text-[#f8fafc]">
-                  45 minutes
-                </SelectItem>
-                <SelectItem value="60" className="text-[#f8fafc] focus:bg-[#334155] focus:text-[#f8fafc]">
-                  1 hour
-                </SelectItem>
-                <SelectItem value="90" className="text-[#f8fafc] focus:bg-[#334155] focus:text-[#f8fafc]">
-                  1.5 hours
-                </SelectItem>
-                <SelectItem value="120" className="text-[#f8fafc] focus:bg-[#334155] focus:text-[#f8fafc]">
-                  2 hours
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="description" className="text-[#f8fafc]">
-              Description
+              Description <span className="text-red-500">*</span>
             </Label>
             <Button
               variant="outline"
@@ -452,4 +493,4 @@ export function ActivityForm() {
       </CardFooter>
     </Card>
   )
-}
+} 

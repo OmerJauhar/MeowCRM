@@ -258,24 +258,9 @@ export function ActivityTimeline() {
             <Button
               className="bg-[#6366f1] hover:bg-[#6366f1]/90 text-white"
               onClick={() => {
-                // This will trigger a navigation to the activities page with the create tab active
-                const activitiesLink = document.querySelector('a[href="/activities"]')
-                if (activitiesLink) {
-                  ;(activitiesLink as HTMLElement).click()
-                  // Set a timeout to allow the page to load before clicking the tab
-                  setTimeout(() => {
-                    const createTab = document.querySelector('[data-state="inactive"][value="create"]')
-                    if (createTab) {
-                      ;(createTab as HTMLElement).click()
-                    }
-                  }, 100)
-                } else {
-                  // Fallback using window.location if the link isn't found
-                  window.location.href = "/activities?tab=create"
-                }
                 toast({
                   title: "Create Activity",
-                  description: "Navigating to create activity form.",
+                  description: "Opening activity creation form.",
                 })
               }}
             >
@@ -396,4 +381,4 @@ export function ActivityTimeline() {
       </CardFooter>
     </Card>
   )
-}
+} 

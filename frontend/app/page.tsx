@@ -1,10 +1,15 @@
-import { DashboardLayout } from "@/components/dashboard-layout"
-import { DashboardContent } from "@/components/dashboard-content"
+"use client";
 
-export default function Home() {
-  return (
-    <DashboardLayout>
-      <DashboardContent />
-    </DashboardLayout>
-  )
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
+export default function Page() {
+  const router = useRouter();
+  
+  useEffect(() => {
+    // Redirect to customers page by default
+    router.push("/customers");
+  }, [router]);
+  
+  return null;
 }

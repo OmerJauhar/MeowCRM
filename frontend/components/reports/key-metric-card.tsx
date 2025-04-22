@@ -53,4 +53,4 @@ export function KeyMetricCard({ title, value, change, trend, icon, sparklineData
       </CardContent>
     </Card>
   )
-}
+} 

@@ -170,3 +170,4 @@ C:\Users\Administrator\Desktop\meowCR\backend\obj\Debug\net9.0\refint\backend.dl
 C:\Users\Administrator\Desktop\meowCR\backend\obj\Debug\net9.0\backend.pdb
 C:\Users\Administrator\Desktop\meowCR\backend\obj\Debug\net9.0\backend.genruntimeconfig.cache
 C:\Users\Administrator\Desktop\meowCR\backend\obj\Debug\net9.0\ref\backend.dll
+C:\Users\Administrator\Desktop\meowCR\backend\obj\Debug\net9.0\backend.sourcelink.json

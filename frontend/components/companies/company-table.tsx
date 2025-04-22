@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
@@ -30,101 +30,7 @@ import {
   Calendar,
 } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
-
-// Sample company data with hierarchy
-const companies = [
-  {
-    id: "1",
-    name: "Acme Corporation",
-    industry: "Technology",
-    employees: "250-500",
-    revenue: "$25M-$50M",
-    status: "Client",
-    lastActivity: "2023-11-14",
-    growth: "up",
-    children: ["6", "7"],
-  },
-  {
-    id: "2",
-    name: "Globex Corp",
-    industry: "Manufacturing",
-    employees: "1000+",
-    revenue: "$100M-$500M",
-    status: "Client",
-    lastActivity: "2023-11-10",
-    growth: "up",
-    children: [],
-  },
-  {
-    id: "3",
-    name: "Stark Industries",
-    industry: "Defense",
-    employees: "5000+",
-    revenue: "$1B+",
-    status: "Client",
-    lastActivity: "2023-11-12",
-    growth: "up",
-    children: ["8"],
-  },
-  {
-    id: "4",
-    name: "Umbrella Corp",
-    industry: "Pharmaceuticals",
-    employees: "1000+",
-    revenue: "$500M-$1B",
-    status: "Prospect",
-    lastActivity: "2023-11-05",
-    growth: "down",
-    children: [],
-  },
-  {
-    id: "5",
-    name: "Wayne Enterprises",
-    industry: "Conglomerate",
-    employees: "10000+",
-    revenue: "$10B+",
-    status: "Vendor",
-    lastActivity: "2023-10-28",
-    growth: "up",
-    children: [],
-  },
-  {
-    id: "6",
-    name: "Acme Cloud Services",
-    industry: "Cloud Computing",
-    employees: "50-100",
-    revenue: "$5M-$10M",
-    status: "Client",
-    lastActivity: "2023-11-08",
-    growth: "up",
-    parent: "1",
-    children: [],
-  },
-  {
-    id: "7",
-    name: "Acme Security Solutions",
-    industry: "Cybersecurity",
-    employees: "100-250",
-    revenue: "$10M-$25M",
-    status: "Client",
-    lastActivity: "2023-11-01",
-    growth: "down",
-    parent: "1",
-    children: [],
-  },
-  {
-    id: "8",
-    name: "Stark Renewable Energy",
-    industry: "Energy",
-    employees: "500-1000",
-    revenue: "$50M-$100M",
-    status: "Prospect",
-    lastActivity: "2023-10-20",
-    growth: "up",
-    parent: "3",
-    children: [],
-  },
-]
+import axios from "axios"
 
 interface CompanyTableProps {
   onSelectCompany: (id: string) => void
@@ -135,6 +41,20 @@ export function CompanyTable({ onSelectCompany }: CompanyTableProps) {
   // Add search state
   const [searchQuery, setSearchQuery] = useState("")
   const { toast } = useToast()
+  const [companies, setCompanies] = useState<any[]>([])
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const response = await axios.get(`https://localhost:7147/api/Company`)
+        setCompanies(response.data.$values)
+      } catch (error) {
+        console.error("Error fetching companies:", error)
+      }
+    }
+
+    fetchCompanies()
+  }, [])
 
   const toggleRowExpand = (id: string) => {
     setExpandedRows((prev) => (prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]))

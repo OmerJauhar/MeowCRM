@@ -24,11 +24,13 @@ interface HeaderProps {
 
 export function Header({ sidebarCollapsed, setSidebarCollapsed }: HeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
   const { theme, setTheme } = useTheme()
 
   useEffect(() => {
     document.title = "Meow CRM"
+    setMounted(true)
   }, [])
 
   const toggleTheme = () => {
@@ -133,7 +135,11 @@ export function Header({ sidebarCollapsed, setSidebarCollapsed }: HeaderProps) {
         </Button>
 
         <Button variant="ghost" size="icon" className={getTextColor()} onClick={toggleTheme}>
-          {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+          {mounted ? (
+            theme === "dark" ? <Sun size={20} /> : <Moon size={20} />
+          ) : (
+            <div style={{ width: '20px', height: '20px' }}></div>
+          )}
         </Button>
 
         <DropdownMenu>

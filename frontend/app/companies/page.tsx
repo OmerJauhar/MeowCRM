@@ -19,8 +19,6 @@ export default function CompaniesPage() {
     </DashboardLayout>
   )
 }
-// Client component to handle state
-;
 
 function CompaniesContent() {
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null)

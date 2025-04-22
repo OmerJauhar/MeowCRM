@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -24,200 +24,7 @@ import {
   Sparkles,
   Plus,
 } from "lucide-react"
-
-// Sample company data
-const companyData = {
-  "1": {
-    id: "1",
-    name: "Acme Corporation",
-    logo: "/placeholder.svg?height=64&width=64",
-    industry: "Technology",
-    website: "www.acmecorp.com",
-    address: "123 Tech Blvd, San Francisco, CA 94107",
-    phone: "+1 (555) 123-4567",
-    email: "info@acmecorp.com",
-    employees: "250-500",
-    revenue: "$25M-$50M",
-    status: "Client",
-    lastActivity: "2023-11-14",
-    growth: "up",
-    description:
-      "Acme Corporation is a leading technology company specializing in cloud solutions, cybersecurity, and digital transformation services.",
-    contacts: [
-      {
-        id: "c1",
-        name: "John Smith",
-        position: "CEO",
-        email: "john.smith@acmecorp.com",
-        phone: "+1 (555) 123-4568",
-      },
-      {
-        id: "c2",
-        name: "Sarah Johnson",
-        position: "CTO",
-        email: "sarah.johnson@acmecorp.com",
-        phone: "+1 (555) 123-4569",
-      },
-      {
-        id: "c3",
-        name: "Michael Brown",
-        position: "Sales Director",
-        email: "michael.brown@acmecorp.com",
-        phone: "+1 (555) 123-4570",
-      },
-    ],
-    financials: {
-      revenue: {
-        current: "$28.5M",
-        previous: "$25.2M",
-        growth: 13.1,
-      },
-      profit: {
-        current: "$5.7M",
-        previous: "$4.8M",
-        growth: 18.8,
-      },
-      averageDeal: {
-        current: "$125K",
-        previous: "$110K",
-        growth: 13.6,
-      },
-      customerAcquisitionCost: {
-        current: "$15K",
-        previous: "$18K",
-        growth: -16.7,
-      },
-    },
-    metrics: {
-      customerSatisfaction: 92,
-      retentionRate: 94,
-      upsellRate: 38,
-      marketShare: 12,
-    },
-  },
-  "2": {
-    id: "2",
-    name: "Globex Corp",
-    logo: "/placeholder.svg?height=64&width=64",
-    industry: "Manufacturing",
-    website: "www.globexcorp.com",
-    address: "456 Industrial Way, Detroit, MI 48201",
-    phone: "+1 (555) 987-6543",
-    email: "info@globexcorp.com",
-    employees: "1000+",
-    revenue: "$100M-$500M",
-    status: "Client",
-    lastActivity: "2023-11-10",
-    growth: "up",
-    description:
-      "Globex Corp is a multinational manufacturing company specializing in automotive parts, industrial equipment, and consumer goods.",
-    contacts: [
-      {
-        id: "c1",
-        name: "Robert Wilson",
-        position: "President",
-        email: "robert.wilson@globexcorp.com",
-        phone: "+1 (555) 987-6544",
-      },
-      {
-        id: "c2",
-        name: "Jennifer Lee",
-        position: "VP of Operations",
-        email: "jennifer.lee@globexcorp.com",
-        phone: "+1 (555) 987-6545",
-      },
-    ],
-    financials: {
-      revenue: {
-        current: "$215M",
-        previous: "$198M",
-        growth: 8.6,
-      },
-      profit: {
-        current: "$32M",
-        previous: "$29M",
-        growth: 10.3,
-      },
-      averageDeal: {
-        current: "$450K",
-        previous: "$425K",
-        growth: 5.9,
-      },
-      customerAcquisitionCost: {
-        current: "$50K",
-        previous: "$55K",
-        growth: -9.1,
-      },
-    },
-    metrics: {
-      customerSatisfaction: 88,
-      retentionRate: 91,
-      upsellRate: 42,
-      marketShare: 15,
-    },
-  },
-  "3": {
-    id: "3",
-    name: "Stark Industries",
-    logo: "/placeholder.svg?height=64&width=64",
-    industry: "Defense",
-    website: "www.starkindustries.com",
-    address: "789 Innovation Pkwy, Malibu, CA 90265",
-    phone: "+1 (555) 456-7890",
-    email: "info@starkindustries.com",
-    employees: "5000+",
-    revenue: "$1B+",
-    status: "Client",
-    lastActivity: "2023-11-12",
-    growth: "up",
-    description:
-      "Stark Industries is a global leader in defense technology, clean energy solutions, and advanced materials research.",
-    contacts: [
-      {
-        id: "c1",
-        name: "Anthony Stark",
-        position: "CEO",
-        email: "tony@starkindustries.com",
-        phone: "+1 (555) 456-7891",
-      },
-      {
-        id: "c2",
-        name: "Virginia Potts",
-        position: "COO",
-        email: "pepper@starkindustries.com",
-        phone: "+1 (555) 456-7892",
-      },
-    ],
-    financials: {
-      revenue: {
-        current: "$1.8B",
-        previous: "$1.5B",
-        growth: 20.0,
-      },
-      profit: {
-        current: "$450M",
-        previous: "$380M",
-        growth: 18.4,
-      },
-      averageDeal: {
-        current: "$12M",
-        previous: "$10M",
-        growth: 20.0,
-      },
-      customerAcquisitionCost: {
-        current: "$1.2M",
-        previous: "$1.5M",
-        growth: -20.0,
-      },
-    },
-    metrics: {
-      customerSatisfaction: 95,
-      retentionRate: 97,
-      upsellRate: 55,
-      marketShare: 35,
-    },
-  },
-}
+import axios from "axios"
 
 interface CompanyDetailProps {
   companyId: string
@@ -225,8 +32,21 @@ interface CompanyDetailProps {
 }
 
 export function CompanyDetail({ companyId, onClose }: CompanyDetailProps) {
-  const company = companyData[companyId as keyof typeof companyData]
+  const [company, setCompany] = useState<any>(null)
   const [activeTab, setActiveTab] = useState("overview")
+
+  useEffect(() => {
+    const fetchCompany = async () => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_BASE_API_URL}/api/Company`);
+        setCompany(response.data);
+      } catch (error) {
+        console.error("Error fetching company details:", error);
+      }
+    };
+
+    fetchCompany();
+  }, []);
 
   if (!company) {
     return (
@@ -425,7 +245,7 @@ export function CompanyDetail({ companyId, onClose }: CompanyDetailProps) {
               </Button>
             </div>
             <div className="space-y-4">
-              {company.contacts.map((contact) => (
+              {company.contacts.map((contact: any) => (
                 <div key={contact.id} className="bg-[#0f172a] p-4 rounded-md">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div className="flex items-center gap-3">
@@ -434,7 +254,7 @@ export function CompanyDetail({ companyId, onClose }: CompanyDetailProps) {
                         <AvatarFallback className="bg-[#6366f1]">
                           {contact.name
                             .split(" ")
-                            .map((n) => n[0])
+                            .map((n: string) => n[0])
                             .join("")}
                         </AvatarFallback>
                       </Avatar>

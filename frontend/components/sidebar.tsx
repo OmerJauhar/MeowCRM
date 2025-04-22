@@ -32,11 +32,9 @@ export function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
   const [activeItem, setActiveItem] = useState(getActiveItem())
 
   const navItems = [
-    { id: "customers", label: "Customers", icon: Users, href: "/" }, // Changed href to root for dashboard
     { id: "companies", label: "Companies", icon: Building2, href: "/companies" },
+    { id: "customers", label: "Customers", icon: Users, href: "/customers" },
     { id: "activities", label: "Activities", icon: Calendar, href: "/activities" },
-    { id: "reports", label: "Reports", icon: BarChart3, href: "/reports" },
-    { id: "settings", label: "Settings", icon: Settings, href: "/settings" },
   ]
 
   // Get theme-specific colors

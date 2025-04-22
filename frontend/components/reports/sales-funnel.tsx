@@ -36,4 +36,4 @@ export function SalesFunnel({ stages }: SalesFunnelProps) {
       })}
     </div>
   )
-}
+} 

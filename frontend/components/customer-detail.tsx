@@ -6,146 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { X, Mail, Phone, Building, Calendar, Edit, MessageSquare, Clock } from "lucide-react"
-
-// Sample customer data
-const customerData = {
-  "1": {
-    id: "1",
-    name: "Olivia Martin",
-    email: "olivia.martin@email.com",
-    phone: "+1 (555) 123-4567",
-    company: "Acme Inc.",
-    position: "Marketing Director",
-    status: "Active",
-    lastContact: "2023-11-14",
-    value: "$24,500",
-    notes: "Key decision maker for upcoming project. Prefers email communication.",
-    activities: [
-      {
-        id: "a1",
-        type: "email",
-        date: "2023-11-14",
-        description: "Sent follow-up about proposal",
-      },
-      {
-        id: "a2",
-        type: "meeting",
-        date: "2023-11-10",
-        description: "Product demo call",
-      },
-      {
-        id: "a3",
-        type: "note",
-        date: "2023-11-05",
-        description: "Discussed pricing options",
-      },
-    ],
-  },
-  "2": {
-    id: "2",
-    name: "Jackson Lee",
-    email: "jackson.lee@email.com",
-    phone: "+1 (555) 987-6543",
-    company: "Globex Corp",
-    position: "CTO",
-    status: "Inactive",
-    lastContact: "2023-10-28",
-    value: "$12,250",
-    notes: "Technical decision maker. Interested in API integration options.",
-    activities: [
-      {
-        id: "a1",
-        type: "email",
-        date: "2023-10-28",
-        description: "Sent technical documentation",
-      },
-      {
-        id: "a2",
-        type: "meeting",
-        date: "2023-10-15",
-        description: "Technical review meeting",
-      },
-    ],
-  },
-  "3": {
-    id: "3",
-    name: "Isabella Nguyen",
-    email: "isabella.nguyen@email.com",
-    phone: "+1 (555) 456-7890",
-    company: "Stark Industries",
-    position: "CEO",
-    status: "Active",
-    lastContact: "2023-11-12",
-    value: "$150,000",
-    notes: "Final decision maker. Looking for enterprise solution.",
-    activities: [
-      {
-        id: "a1",
-        type: "meeting",
-        date: "2023-11-12",
-        description: "Executive presentation",
-      },
-      {
-        id: "a2",
-        type: "email",
-        date: "2023-11-08",
-        description: "Sent executive summary",
-      },
-    ],
-  },
-  "4": {
-    id: "4",
-    name: "William Kim",
-    email: "william.kim@email.com",
-    phone: "+1 (555) 789-0123",
-    company: "Umbrella Corp",
-    position: "Procurement Manager",
-    status: "Active",
-    lastContact: "2023-11-10",
-    value: "$75,800",
-    notes: "Handles vendor relationships. Needs detailed pricing breakdown.",
-    activities: [
-      {
-        id: "a1",
-        type: "email",
-        date: "2023-11-10",
-        description: "Sent pricing details",
-      },
-      {
-        id: "a2",
-        type: "note",
-        date: "2023-11-01",
-        description: "Discussed contract terms",
-      },
-    ],
-  },
-  "5": {
-    id: "5",
-    name: "Sofia Davis",
-    email: "sofia.davis@email.com",
-    phone: "+1 (555) 234-5678",
-    company: "Wayne Enterprises",
-    position: "Innovation Lead",
-    status: "Inactive",
-    lastContact: "2023-09-15",
-    value: "$36,200",
-    notes: "Looking for cutting-edge solutions. Slow decision making process.",
-    activities: [
-      {
-        id: "a1",
-        type: "meeting",
-        date: "2023-09-15",
-        description: "Product roadmap discussion",
-      },
-      {
-        id: "a2",
-        type: "email",
-        date: "2023-09-10",
-        description: "Sent case studies",
-      },
-    ],
-  },
-}
+import { useState, useEffect } from "react"
+import axios from "axios"
 
 interface CustomerDetailProps {
   customerId: string
@@ -153,7 +15,56 @@ interface CustomerDetailProps {
 }
 
 export function CustomerDetail({ customerId, onClose }: CustomerDetailProps) {
-  const customer = customerData[customerId as keyof typeof customerData]
+  const [customer, setCustomer] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchCustomer = async () => {
+      try {
+        setLoading(true)
+        const response = await axios.get(`https://localhost:7147/api/Customer/${customerId}`)
+        // Format the customer data
+        const customerData = {
+          id: response.data.id,
+          name: `${response.data.firstName} ${response.data.lastName}`,
+          firstName: response.data.firstName,
+          lastName: response.data.lastName,
+          email: response.data.email,
+          phone: response.data.phone,
+          company: response.data.company.name,
+          position: response.data.position,
+          status: response.data.status,
+          lastContact: new Date(response.data.createDate).toLocaleDateString(),
+          value: response.data.customerValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+          customerValue: response.data.customerValue,
+          notes: response.data.notes.$values && response.data.notes.$values.length > 0 
+            ? response.data.notes.$values.map((note: any) => note.content).join('\n\n')
+            : "No notes available for this customer.",
+          activities: response.data.activities.$values || []
+        }
+        
+        setCustomer(customerData)
+      } catch (error) {
+        console.error("Error fetching customer details:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (customerId) {
+      fetchCustomer()
+    }
+  }, [customerId])
+
+  if (loading) {
+    return (
+      <Card className="bg-[#1e293b] border-[#334155] shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-[#f8fafc]">Loading customer details...</CardTitle>
+        </CardHeader>
+      </Card>
+    )
+  }
 
   if (!customer) {
     return (
@@ -188,10 +99,7 @@ export function CustomerDetail({ customerId, onClose }: CustomerDetailProps) {
           <Avatar className="h-16 w-16">
             <AvatarImage src={`/placeholder.svg?height=64&width=64`} />
             <AvatarFallback className="bg-[#6366f1] text-lg">
-              {customer.name
-                .split(" ")
-                .map((n) => n[0])
-                .join("")}
+              {customer.firstName.charAt(0)}{customer.lastName.charAt(0)}
             </AvatarFallback>
           </Avatar>
           <div className="space-y-1">
@@ -243,7 +151,7 @@ export function CustomerDetail({ customerId, onClose }: CustomerDetailProps) {
 
         <div className="space-y-3">
           <h4 className="text-sm font-medium text-[#f8fafc]">Notes</h4>
-          <p className="text-sm text-[#f8fafc] bg-[#0f172a] p-3 rounded-md">{customer.notes}</p>
+          <p className="text-sm text-[#f8fafc] bg-[#0f172a] p-3 rounded-md whitespace-pre-line">{customer.notes}</p>
           <Button variant="outline" size="sm" className="border-[#334155] text-[#94a3b8]">
             <Edit size={14} className="mr-2" />
             Edit Notes
@@ -255,25 +163,29 @@ export function CustomerDetail({ customerId, onClose }: CustomerDetailProps) {
         <div className="space-y-3">
           <h4 className="text-sm font-medium text-[#f8fafc]">Recent Activities</h4>
           <div className="space-y-3">
-            {customer.activities.map((activity) => (
-              <div key={activity.id} className="flex items-start gap-3 bg-[#0f172a] p-3 rounded-md">
-                <div className="mt-0.5">
-                  {activity.type === "email" ? (
-                    <Mail size={16} className="text-[#6366f1]" />
-                  ) : activity.type === "meeting" ? (
-                    <MessageSquare size={16} className="text-[#10b981]" />
-                  ) : (
-                    <Clock size={16} className="text-[#94a3b8]" />
-                  )}
-                </div>
-                <div className="flex-1">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                    <p className="text-sm font-medium text-[#f8fafc]">{activity.description}</p>
-                    <span className="text-xs text-[#94a3b8]">{activity.date}</span>
+            {customer.activities.length === 0 ? (
+              <p className="text-sm text-[#94a3b8] bg-[#0f172a] p-3 rounded-md">No recent activities</p>
+            ) : (
+              customer.activities.map((activity: any) => (
+                <div key={activity.id} className="flex items-start gap-3 bg-[#0f172a] p-3 rounded-md">
+                  <div className="mt-0.5">
+                    {activity.type === "Email" ? (
+                      <Mail size={16} className="text-[#6366f1]" />
+                    ) : activity.type === "Meeting" ? (
+                      <MessageSquare size={16} className="text-[#10b981]" />
+                    ) : (
+                      <Clock size={16} className="text-[#94a3b8]" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                      <p className="text-sm font-medium text-[#f8fafc]">{activity.description}</p>
+                      <span className="text-xs text-[#94a3b8]">{new Date(activity.date).toLocaleDateString()}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
           <Button className="w-full bg-[#0f172a] hover:bg-[#0f172a]/80 text-[#f8fafc]">View All Activities</Button>
         </div>

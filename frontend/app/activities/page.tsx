@@ -1,10 +1,5 @@
-"use client";
-
 import { DashboardLayout } from "@/components/dashboard-layout"
-import { ActivityTimeline } from "@/components/activities/activity-timeline"
-import { ActivityForm } from "@/components/activities/activity-form"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useSearchParams } from "next/navigation"
+import { ActivitiesTabs } from "@/components/activities/activities-tabs"
 
 export default function ActivitiesPage() {
   return (
@@ -20,28 +15,4 @@ export default function ActivitiesPage() {
       </div>
     </DashboardLayout>
   )
-}
-
-function ActivitiesTabs() {
-  const searchParams = useSearchParams()
-  const tab = searchParams?.get("tab") || "timeline"
-
-  return (
-    <Tabs defaultValue={tab} className="space-y-4">
-      <TabsList className="bg-[#1e293b] border border-[#334155]">
-        <TabsTrigger value="timeline" className="data-[state=active]:bg-[#0f172a] data-[state=active]:text-[#f8fafc]">
-          Timeline
-        </TabsTrigger>
-        <TabsTrigger value="create" className="data-[state=active]:bg-[#0f172a] data-[state=active]:text-[#f8fafc]">
-          Create Activity
-        </TabsTrigger>
-      </TabsList>
-      <TabsContent value="timeline">
-        <ActivityTimeline />
-      </TabsContent>
-      <TabsContent value="create">
-        <ActivityForm />
-      </TabsContent>
-    </Tabs>
-  )
-}
+} 

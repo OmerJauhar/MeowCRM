@@ -79,4 +79,4 @@ export function AIInsights() {
       </CardFooter>
     </Card>
   )
-}
+} 
